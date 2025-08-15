@@ -17,6 +17,7 @@ func main() {
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
 
+	r.GET("/health", healthHandler)
 	r.POST("/login", loginHandler)
 	r.POST("/send-otp", sendOTPHandler)
 	r.POST("/verify-otp", verifyOTPHandler)
@@ -30,6 +31,10 @@ func main() {
 	}()
 
 	r.Run(":8080")
+}
+
+func healthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 }
 
 func loginHandler(c *gin.Context) {
