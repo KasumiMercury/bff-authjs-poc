@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -21,14 +22,7 @@ func main() {
 	r.POST("/login", loginHandler)
 	r.POST("/send-otp", sendOTPHandler)
 	r.POST("/verify-otp", verifyOTPHandler)
-
-	go func() {
-		ticker := time.NewTicker(1 * time.Minute)
-		defer ticker.Stop()
-		for range ticker.C {
-			cleanupExpiredOTPs()
-		}
-	}()
+	r.POST("/oauth-login", oauthLoginHandler)
 
 	r.Run(":8080")
 }
@@ -92,3 +86,56 @@ func verifyOTPHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, LoginResponse{Token: token})
 }
+
+func oauthLoginHandler(c *gin.Context) {
+	log.Printf("OAuth login endpoint called")
+	
+	var req OAuthLoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("OAuth login: Invalid request format - %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		return
+	}
+
+	log.Printf("OAuth login request: provider=%s, email=%s, name=%s", req.Provider, req.Email, req.Name)
+	
+	// Googleトークンが送信されている場合は保存
+	if req.Provider == "google" {
+		if req.AccessToken != "" {
+			log.Printf("=== OAuth Login: Google Token Received ===")
+			log.Printf("User Email: %s", req.Email)
+			log.Printf("Access Token Received: YES (length: %d)", len(req.AccessToken))
+			log.Printf("Refresh Token Received: %t (length: %d)", req.RefreshToken != "", len(req.RefreshToken))
+			log.Printf("Token Expires At: %d (%v)", req.ExpiresAt, time.Unix(req.ExpiresAt, 0))
+			log.Printf("==========================================")
+			
+			storeGoogleToken(req.Email, req.Email, req.AccessToken, req.RefreshToken, req.ExpiresAt)
+		} else {
+			log.Printf("=== OAuth Login: Google Token Missing ===")
+			log.Printf("User Email: %s", req.Email)
+			log.Printf("Access Token: MISSING")
+			log.Printf("Refresh Token: MISSING")
+			log.Printf("Note: Tokens may not have been sent by NextAuth")
+			log.Printf("========================================")
+		}
+	}
+
+	token, err := generateJWT(req.Email)
+	if err != nil {
+		log.Printf("OAuth login: Failed to generate JWT for %s - %v", req.Email, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	log.Printf("OAuth login: JWT token generated successfully for user: %s", req.Email)
+	c.JSON(http.StatusOK, LoginResponse{Token: token})
+}
+
+func truncateString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen]
+}
+
