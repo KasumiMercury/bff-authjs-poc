@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { atom, useAtom } from "jotai";
+import { useId } from "react";
 
 const activeTabAtom = atom<"password" | "otp" | "google">("password");
 const otpStepAtom = atom<"email" | "verify">("email");
@@ -17,6 +18,12 @@ export default function Login() {
 	const [loading, setLoading] = useAtom(loadingAtom);
 	const [message, setMessage] = useAtom(messageAtom);
 	const router = useRouter();
+	
+	const usernameId = useId();
+	const passwordId = useId();
+	const emailId = useId();
+	const emailDisplayId = useId();
+	const otpId = useId();
 
 	async function handlePasswordLogin(formData: FormData) {
 		const username = formData.get("username") as string;
@@ -201,11 +208,11 @@ export default function Login() {
 					<form className="mt-8 space-y-6" action={handlePasswordLogin}>
 						<div className="rounded-md shadow-sm -space-y-px">
 							<div>
-								<label htmlFor="username" className="sr-only">
+								<label htmlFor={usernameId} className="sr-only">
 									ユーザー名
 								</label>
 								<input
-									id="username"
+									id={usernameId}
 									name="username"
 									type="text"
 									required
@@ -214,11 +221,11 @@ export default function Login() {
 								/>
 							</div>
 							<div>
-								<label htmlFor="password" className="sr-only">
+								<label htmlFor={passwordId} className="sr-only">
 									パスワード
 								</label>
 								<input
-									id="password"
+									id={passwordId}
 									name="password"
 									type="password"
 									required
@@ -246,11 +253,11 @@ export default function Login() {
 						{otpStep === "email" ? (
 							<form action={handleSendOTP} className="space-y-6">
 								<div>
-									<label htmlFor="email" className="sr-only">
+									<label htmlFor={emailId} className="sr-only">
 										メールアドレス
 									</label>
 									<input
-										id="email"
+										id={emailId}
 										name="email"
 										type="email"
 										required
@@ -275,13 +282,13 @@ export default function Login() {
 							<form action={handleVerifyOTP} className="space-y-6">
 								<div>
 									<label
-										htmlFor="email-display"
+										htmlFor={emailDisplayId}
 										className="block text-sm font-medium text-gray-700"
 									>
 										メールアドレス
 									</label>
 									<input
-										id="email-display"
+										id={emailDisplayId}
 										type="email"
 										value={email}
 										disabled
@@ -290,11 +297,11 @@ export default function Login() {
 								</div>
 
 								<div>
-									<label htmlFor="otp" className="sr-only">
+									<label htmlFor={otpId} className="sr-only">
 										OTPコード
 									</label>
 									<input
-										id="otp"
+										id={otpId}
 										name="otp"
 										type="text"
 										required

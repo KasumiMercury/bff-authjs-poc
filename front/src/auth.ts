@@ -1,7 +1,6 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { JWT } from "next-auth/jwt";
 
 // デバッグ用: 環境変数の確認
 console.log("NextAuth Environment Variables:", {
@@ -152,7 +151,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 						profile,
 					});
 
-					const requestBody: any = {
+					interface OAuthRequestBody {
+						email: string | null;
+						name: string | null;
+						provider: string;
+						access_token?: string;
+						refresh_token?: string;
+						expires_at?: number;
+					}
+
+					const requestBody: OAuthRequestBody = {
 						email: user.email,
 						name: user.name,
 						provider: "google",

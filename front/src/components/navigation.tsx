@@ -41,6 +41,7 @@ export function Navigation() {
 									こんにちは、{session.user?.name}さん
 								</span>
 								<button
+									type="button"
 									onClick={() => signOut({ callbackUrl: "/" })}
 									className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
 								>
