@@ -18,6 +18,11 @@ export default async function Home() {
               <p className="text-green-700">
                 <strong>ユーザーID:</strong> {session.user?.id}
               </p>
+              {session.user?.email && (
+                <p className="text-green-700">
+                  <strong>メールアドレス:</strong> {session.user.email}
+                </p>
+              )}
               {session.user?.token && (
                 <div className="mt-4">
                   <p className="text-green-700 font-semibold">JWTトークン:</p>
