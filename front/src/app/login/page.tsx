@@ -18,7 +18,7 @@ export default function Login() {
 	const [loading, setLoading] = useAtom(loadingAtom);
 	const [message, setMessage] = useAtom(messageAtom);
 	const router = useRouter();
-	
+
 	const usernameId = useId();
 	const passwordId = useId();
 	const emailId = useId();
