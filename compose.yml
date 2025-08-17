@@ -16,7 +16,7 @@ services:
       context: ./front
       dockerfile: Dockerfile
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - EXTERNAL_API_BASE_URL=http://idp:8080
     volumes:
